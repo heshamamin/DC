@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DesignCrowd.Holidays;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -32,12 +33,17 @@ namespace DesignCrowd
             var businessDays = WeekdaysBetweenTwoDates(firstDate, secondDate);
             foreach (var holiday in publicHolidays.Distinct())
             {
-                if (holiday >= firstDate && holiday < secondDate && holiday.DayOfWeek != DayOfWeek.Saturday && holiday.DayOfWeek != DayOfWeek.Sunday)
+                if (holiday > firstDate && holiday < secondDate && holiday.DayOfWeek != DayOfWeek.Saturday && holiday.DayOfWeek != DayOfWeek.Sunday)
                 {
                     businessDays--;
                 }
             }
             return businessDays;
+        }
+
+        public int BusinessDaysBetweenTwoDates(DateTime firstDate, DateTime secondDate, IHolidaysFactory holidaysFactory)
+        {
+            return BusinessDaysBetweenTwoDates(firstDate, secondDate, holidaysFactory.CreateHolidays(firstDate, secondDate));
         }
 
         private int CalculateDateAdjustment(DateTime date)
@@ -88,7 +94,6 @@ namespace DesignCrowd
         {
             return 2 * (difference / 7);
         }
-
 
     }
 }

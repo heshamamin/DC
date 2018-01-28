@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using DesignCrowd.Holidays;
+using Moq;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 
@@ -13,7 +15,6 @@ namespace DesignCrowd.Tests
         {
             Sut = new BusinessDayCounter();
         }
-
 
         [Test]
         public void WeekdaysBetweenTwoDates_RetrunsDaysWithinGivenRangeExcludingStartAndEnd()
@@ -86,7 +87,7 @@ namespace DesignCrowd.Tests
         [Test]
         public void BusinessDaysBetweenTwoDates_NullPublicHolidaysThrowsArgumentNullException()
         {
-            var exception = Assert.Throws<ArgumentNullException>(() => Sut.BusinessDaysBetweenTwoDates(new DateTime(2013, 12, 25), new DateTime(2013, 12, 26), null));
+            var exception = Assert.Throws<ArgumentNullException>(() => Sut.BusinessDaysBetweenTwoDates(new DateTime(2013, 12, 25), new DateTime(2013, 12, 26), (IList<DateTime>)null));
             Assert.That(exception.ParamName, Is.EqualTo("publicHolidays"));
         }
 
@@ -131,6 +132,23 @@ namespace DesignCrowd.Tests
                 new DateTime(2017, 12, 31),
             };
             Assert.That(Sut.BusinessDaysBetweenTwoDates(firstDate, secondDate, vacations), Is.EqualTo(2));
+        }
+
+        [Test]
+        public void BusinessDaysBetweenTwoDates_CalculatesDaysBasedOnHolidayFactory()
+        {
+            var firstDate = new DateTime(2018, 1, 1);
+            var secondDate = new DateTime(2018, 1, 5);
+            var holidays = new List<DateTime>()
+            {
+                new DateTime(2018, 1, 2),
+            };
+
+            var holidaysFactoryMock = new Mock<IHolidaysFactory>();
+            holidaysFactoryMock.Setup(h => h.CreateHolidays(It.Is<DateTime>(d => d.Equals(firstDate)), It.Is<DateTime>(d => d.Equals(secondDate)))).Returns(holidays);
+
+            Assert.That(Sut.BusinessDaysBetweenTwoDates(firstDate, secondDate, holidaysFactoryMock.Object), Is.EqualTo(2));
+            holidaysFactoryMock.VerifyAll();
         }
 
     }
