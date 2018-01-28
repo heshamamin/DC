@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DesignCrowd
 {
@@ -21,6 +22,24 @@ namespace DesignCrowd
             return workdaysToSecondDate - workdaysToFirstDate + secondDateAdjustment;
         }
 
+        public int BusinessDaysBetweenTwoDates(DateTime firstDate, DateTime secondDate, IList<DateTime> publicHolidays)
+        {
+            if (publicHolidays == null)
+            {
+                throw new ArgumentNullException(nameof(publicHolidays));
+            }
+
+            var businessDays = WeekdaysBetweenTwoDates(firstDate, secondDate);
+            foreach (var holiday in publicHolidays.Distinct())
+            {
+                if (holiday >= firstDate && holiday < secondDate && holiday.DayOfWeek != DayOfWeek.Saturday && holiday.DayOfWeek != DayOfWeek.Sunday)
+                {
+                    businessDays--;
+                }
+            }
+            return businessDays;
+        }
+
         private int CalculateDateAdjustment(DateTime date)
         {
             if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
@@ -33,16 +52,8 @@ namespace DesignCrowd
         internal static int CalculateWorkDaysFromBaseMonday(DateTime baseMonday, DateTime date)
         {
             var difference = (int)Math.Round(date.Subtract(baseMonday).TotalDays, 0);
-            var fullWeekends = 2 * (difference / 7);
-            var partialWeekends = 0;
-            if (difference % 7 == 5)
-            {
-                partialWeekends = 1;
-            }
-            else if (difference % 7 == 6)
-            {
-                partialWeekends = 2;
-            }
+            var fullWeekends = CalculateFullWeekends(difference);
+            int partialWeekends = CalculatePartialWeekends(difference);
 
             difference = difference - fullWeekends - partialWeekends;
             return difference;
@@ -58,9 +69,26 @@ namespace DesignCrowd
             return date.AddDays(days - 7);
         }
 
-        public int BusinessDaysBetweenTwoDates(DateTime firstDate, DateTime secondDate, IList<DateTime> publicHolidays)
+        private static int CalculatePartialWeekends(int difference)
         {
-            return 0;
+            var partialWeekends = 0;
+            if (difference % 7 == 5)
+            {
+                partialWeekends = 1;
+            }
+            else if (difference % 7 == 6)
+            {
+                partialWeekends = 2;
+            }
+
+            return partialWeekends;
         }
+
+        private static int CalculateFullWeekends(int difference)
+        {
+            return 2 * (difference / 7);
+        }
+
+
     }
 }
