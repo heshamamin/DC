@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace DesignCrowd
 {
@@ -8,6 +7,11 @@ namespace DesignCrowd
     {
         public int WeekdaysBetweenTwoDates(DateTime firstDate, DateTime secondDate)
         {
+            if (secondDate.Date <= firstDate.Date)
+            {
+                return 0;
+            }
+
             var baseMonday = GetBaseMondayDate(firstDate);
             var workdaysToFirstDate = CalculateWorkDaysFromBaseMonday(baseMonday, firstDate);
             var workdaysToSecondDate = CalculateWorkDaysFromBaseMonday(baseMonday, secondDate);

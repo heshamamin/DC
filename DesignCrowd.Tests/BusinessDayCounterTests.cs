@@ -29,6 +29,17 @@ namespace DesignCrowd.Tests
             Assert.That(sut.WeekdaysBetweenTwoDates(firstDate, secondDate), Is.EqualTo(expected));
         }
 
+        [TestCase(2013, 10, 7, 2013, 10, 7)]
+        [TestCase(2013, 10, 7, 2013, 10, 5)]
+        public void WeekdaysBetweenTwoDatesWithZeroIntervals(int firstYear, int firstMonth, int firstDay, int secondYear, int secondMonth, int secondDay)
+        {
+            var sut = new BusinessDayCounter();
+            var firstDate = new DateTime(firstYear, firstMonth, firstDay);
+            var secondDate = new DateTime(secondYear, secondMonth, secondDay);
+            Assert.That(sut.WeekdaysBetweenTwoDates(firstDate, secondDate), Is.EqualTo(0));
+        }
+
+
 
         [TestCase(2018, 1, 28, 2018, 1, 22)]
         [TestCase(2018, 1, 29, 2018, 1, 29)]
