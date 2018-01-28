@@ -29,16 +29,31 @@ namespace DesignCrowd.Tests
             Assert.That(sut.WeekdaysBetweenTwoDates(firstDate, secondDate), Is.EqualTo(expected));
         }
 
-        [TestCase(2018, 1, 28, 2018, 1, 29)]
+
+        [TestCase(2018, 1, 28, 2018, 1, 22)]
         [TestCase(2018, 1, 29, 2018, 1, 29)]
-        [TestCase(2018, 1, 16, 2018, 1, 22)]
-        public void GetNextMondayTest(int year, int month, int day, int expectedYear, int expectedMonth, int expectedDay)
+        [TestCase(2018, 1, 16, 2018, 1, 15)]
+        public void GetBaseMondayDateTest(int year, int month, int day, int expectedYear, int expectedMonth, int expectedDay)
         {
-            var actual = BusinessDayCounter.GetNearestMondayDate(new DateTime(year, month, day));
+            var actual = BusinessDayCounter.GetBaseMondayDate(new DateTime(year, month, day));
             var expected = new DateTime(expectedYear, expectedMonth, expectedDay);
 
             Assert.That(actual, Is.EqualTo(expected));
         }
+
+        [TestCase(2018, 1, 22, 2018, 1, 22, 0)]
+        [TestCase(2018, 1, 29, 2018, 1, 30, 1)]
+        [TestCase(2018, 1, 15, 2018, 1, 23, 6)]
+        [TestCase(2018, 1, 15, 2018, 1, 22, 5)]
+        [TestCase(2018, 1, 15, 2018, 1, 21, 4)]
+        [TestCase(2018, 1, 15, 2018, 1, 20, 4)]
+        public void CalculateWorkDaysFromBaseMondayTest(int baseYear, int baseMonth, int baseDay, int year, int month, int day, int expected)
+        {
+            var actual = BusinessDayCounter.CalculateWorkDaysFromBaseMonday(new DateTime(baseYear, baseMonth, baseDay), new DateTime(year, month, day));
+
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
 
 
 

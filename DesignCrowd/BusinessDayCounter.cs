@@ -8,71 +8,51 @@ namespace DesignCrowd
     {
         public int WeekdaysBetweenTwoDates(DateTime firstDate, DateTime secondDate)
         {
-            var adjustedFirstDate = AdjustFirstDate(firstDate);
-            var adjustedSecondDate = AdjustSecondDate(secondDate);
+            var baseMonday = GetBaseMondayDate(firstDate);
+            var workdaysToFirstDate = CalculateWorkDaysFromBaseMonday(baseMonday, firstDate);
+            var workdaysToSecondDate = CalculateWorkDaysFromBaseMonday(baseMonday, secondDate);
 
-            var nearestMonday = GetNearestMondayDate(adjustedFirstDate);
+            var secondDateAdjustment = CalculateDateAdjustment(secondDate);
 
-            if (nearestMonday > adjustedSecondDate)
-            {
-                return (int)adjustedSecondDate.Subtract(adjustedFirstDate).TotalDays;
-            }
-
-            var weekDays = adjustedFirstDate.Equals(nearestMonday) ? 0 : (int)nearestMonday.Subtract(adjustedFirstDate).TotalDays - 2;
-            if (!(firstDate.DayOfWeek == DayOfWeek.Saturday || firstDate.DayOfWeek == DayOfWeek.Sunday))
-            {
-                weekDays--;
-            }
-
-            if (adjustedSecondDate > nearestMonday)
-            {
-                var total = (int)adjustedSecondDate.Subtract(nearestMonday).TotalDays;
-                var weekendDays = 2 * (total / 7);
-                weekDays += total - weekendDays;
-            }
-
-            return weekDays;
+            return workdaysToSecondDate - workdaysToFirstDate + secondDateAdjustment;
         }
 
-        private static DateTime AdjustFirstDate(DateTime firstDate)
+        private int CalculateDateAdjustment(DateTime date)
         {
-            var adjustment = 0;
-            switch (firstDate.DayOfWeek)
+            if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
             {
-                case DayOfWeek.Saturday:
-                    adjustment = 2;
-                    break;
-                case DayOfWeek.Sunday:
-                    adjustment = 1;
-                    break;
-                default:
-                    adjustment = 0;
-                    break;
+                return 0;
             }
-            return firstDate.AddDays(adjustment);
+            return -1;
         }
 
-        private static DateTime AdjustSecondDate(DateTime secondDate)
+        internal static int CalculateWorkDaysFromBaseMonday(DateTime baseMonday, DateTime date)
         {
-            var adjustment = 0;
-            switch (secondDate.DayOfWeek)
+            var difference = (int)Math.Round(date.Subtract(baseMonday).TotalDays, 0);
+            var fullWeekends = 2 * (difference / 7);
+            var partialWeekends = 0;
+            if (difference % 7 == 5)
             {
-                case DayOfWeek.Sunday:
-                    adjustment = -1;
-                    break;
-                default:
-                    adjustment = 0;
-                    break;
+                partialWeekends = 1;
             }
-            return secondDate.AddDays(adjustment);
+            else if (difference % 7 == 6)
+            {
+                partialWeekends = 2;
+            }
+
+            difference = difference - fullWeekends - partialWeekends;
+            return difference;
         }
 
-        internal static DateTime GetNearestMondayDate(DateTime date)
+        internal static DateTime GetBaseMondayDate(DateTime date)
         {
+            if (date.DayOfWeek == DayOfWeek.Monday)
+            {
+                return date;
+            }
             var days = (8 - ((int)date.DayOfWeek)) % 7;
-            return date.AddDays(days);
+            return date.AddDays(days - 7);
         }
-
 
         public int BusinessDaysBetweenTwoDates(DateTime firstDate, DateTime secondDate, IList<DateTime> publicHolidays)
         {
